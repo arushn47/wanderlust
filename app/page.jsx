@@ -1,26 +1,26 @@
 import Card from '@components/listings/Card';
+import { connectToDB } from '@utils/database';
+import Listing from '@models/listing';
 
 async function getListings() {
   try {
-    const res = await fetch('http://localhost:3000/api/listings', { cache: 'no-store' });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch listings: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return data?.data || [];
+    await connectToDB();
+    const listings = await Listing.find({});
+    // Return the plain data. Mongoose documents need to be converted.
+    return JSON.parse(JSON.stringify(listings));
   } catch (error) {
-    console.error('Error fetching listings:', error);
+    console.error('Error fetching listings directly:', error);
     return [];
   }
 }
+
 
 export default async function HomePage() {
   const listings = await getListings();
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-10 ">
+    <main className="max-w-7xl mx-auto px-4 py-10">
+
       <section>
         {listings.length === 0 ? (
           <p className="text-gray-500">No listings available right now. Please check back later.</p>
